@@ -2,19 +2,21 @@
 namespace App\Http\Services\Pengeluaran;
 
 use Exception;
-use App\Models\Akun;
+use App\Models\Pengeluaran;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\Akun\AkunResource;
+use App\Http\Resources\Pengeluaran\PengeluaranResource;
 
 class PengeluaranService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $pengeluaranModel;
+    private $carbon;
 
     public function __construct()
     {
-        $this->pengeluaranModel = new Akun();
+        $this->pengeluaranModel = new Pengeluaran();
+        $this->carbon = $this->returnCarbon();
     }
 
     /* FETCH ALL PENGELUARAN */
@@ -32,7 +34,7 @@ class PengeluaranService extends BaseService
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
-        $datas = AkunResource::collection($datas);
+        $datas = PengeluaranResource::collection($datas);
         $pengeluaran = [
             "total" => $totalData,
             "total_filter" => $totalFiltered,
@@ -55,7 +57,7 @@ class PengeluaranService extends BaseService
         try {
             $pengeluaran = $this->pengeluaranModel::find($id);
             if ($pengeluaran) {
-                $pengeluaran = AkunResource::make($pengeluaran);
+                $pengeluaran = PengeluaranResource::make($pengeluaran);
                 return $pengeluaran;
             }
 
@@ -66,23 +68,21 @@ class PengeluaranService extends BaseService
     }
 
     /* CREATE NEW PENGELUARAN */
-    public function createAkun($props){
+    public function createPengeluaran($props){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
         try {
             $pengeluaran = $this->pengeluaranModel;
-            $pengeluaran->kode_akun    = $props['kode_akun'];
-            $pengeluaran->nama_akun    = $props['nama_akun'];
-            $pengeluaran->akun_utama   = $props['akun_utama'];
-            $pengeluaran->tipe_akun    = $props['tipe_akun'];
-            $pengeluaran->created_id   = $this->returnAuthUser()->id;
+            $pengeluaran->bulan     = $props['bulan'];
+            $pengeluaran->tahun     = $props['tahun'];
+            $pengeluaran->id_user   = $this->returnAuthUser()->id;
             $pengeluaran->save();
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
-            $pengeluaran = AkunResource::make($pengeluaran);
+            $pengeluaran = PengeluaranResource::make($pengeluaran);
             return $pengeluaran;
         } catch (Exception $ex) {
             /* ROLLBACK DB TRANSACTION */
@@ -93,7 +93,7 @@ class PengeluaranService extends BaseService
     }
 
     /* UPDATE PENGELUARAN */
-    public function updateAkun($props, $id){
+    public function updatePengeluaran($props, $id){
         /* BEGIN DB TRANSACTION */
         DB::beginTransaction();
 
@@ -101,17 +101,15 @@ class PengeluaranService extends BaseService
             $pengeluaran = $this->pengeluaranModel::find($id);
             if ($pengeluaran) {
                 /* UPDATE PENGELUARAN */
-                $pengeluaran->kode_akun    = $props['kode_akun'];
-                $pengeluaran->nama_akun    = $props['nama_akun'];
-                $pengeluaran->akun_utama   = $props['akun_utama'];
-                $pengeluaran->tipe_akun    = $props['tipe_akun'];
-                $pengeluaran->updated_id   = $this->returnAuthUser()->id;
+                $pengeluaran->bulan     = $props['bulan'];
+                $pengeluaran->tahun     = $props['tahun'];
+                $pengeluaran->id_user   = $this->returnAuthUser()->id;
                 $pengeluaran->update();
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
 
-                $pengeluaran = AkunResource::make($pengeluaran);
+                $pengeluaran = PengeluaranResource::make($pengeluaran);
                 return $pengeluaran;
             } else {
                 throw new Exception('Catatan tidak ditemukan!');
@@ -125,7 +123,7 @@ class PengeluaranService extends BaseService
     }
 
     /* DESTROY PENGELUARAN */
-    public function destroyAkun($id){
+    public function destroyPengeluaran($id){
         try {
             $pengeluaran = $this->pengeluaranModel::find($id);
             if ($pengeluaran) {
@@ -141,7 +139,7 @@ class PengeluaranService extends BaseService
     }
 
     /* DESTROY SELECTED / MULTIPLE PENGELUARAN */
-    public function destroyMultipleAkun($props){
+    public function destroyMultiplePengeluaran($props){
         try {
             $pengeluaran = $this->pengeluaranModel::whereIn('id', $props);
 
@@ -155,32 +153,5 @@ class PengeluaranService extends BaseService
         } catch (Exception $ex) {
             throw $ex;
         }
-    }
-
-    /* FETCH ALL PENGELUARAN FOR OPTIONS */
-    public function fetchDataOptions($props){
-        try {
-            /* GET DATA WITH FILTER AS A MODEL */
-            $datas = $this->dataFilterPagination($this->pengeluaranModel, $props, null);
-
-            /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
-            $pengeluaran = $datas->select('id', 'kode_akun', 'nama_akun')->get();
-
-            return $pengeluaran;
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-    }
-
-    /* GENERATE NO TRANSAKSI AUTOMATICALLY */
-    public function createNoTransaksi(){
-        $year   = $this->carbon::now()->format('Y');
-
-        $newID  = "";
-        $maxID  = DB::select('SELECT IFNULL(RIGHT(MAX(kode_user), 5), 0) AS maxID FROM users WHERE deleted_at IS NULL AND RIGHT(LEFT(kode_user, 7), 4) = :id', ['id' => $year]);
-        $newID  = (int)$maxID[0]->maxID + 1;
-        $newID  = 'PJ-'.$year.''.substr("0000000$newID", -3);
-
-        return $newID;
     }
 }

@@ -7,7 +7,9 @@ use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Kendaraan\KendaraanController;
 use App\Http\Controllers\Pendapatan\PendapatanController;
+use App\Http\Controllers\Pengeluaran\PengeluaranController;
 use App\Http\Controllers\Pendapatan\DetailPendapatanController;
+use App\Http\Controllers\Pengeluaran\DetailPengeluaranController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +69,26 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/detail-pendapatan/{id}', 'update')->name('detail-pendapatan.update');
         Route::delete('/detail-pendapatan/{id}', 'destroy')->name('detail-pendapatan.destroy');
         Route::delete('/detail-pendapatan', 'destroyMultiple')->name('detail-pendapatan.destroyMultiple');
+    });
+
+    /* PENGELUARAN */
+    Route::controller(PengeluaranController::class)->group(function(){
+        Route::get('/pengeluaran', 'index')->name('pengeluaran.index');
+        Route::post('/pengeluaran', 'store')->name('pengeluaran.store');
+        Route::get('/pengeluaran/{id}', 'show')->name('pengeluaran.show');
+        Route::put('/pengeluaran/{id}', 'update')->name('pengeluaran.update');
+        Route::delete('/pengeluaran/{id}', 'destroy')->name('pengeluaran.destroy');
+        Route::delete('/pengeluaran', 'destroyMultiple')->name('pengeluaran.destroyMultiple');
+    });
+
+    /* DETAIL PENGELUARAN */
+    Route::controller(DetailPengeluaranController::class)->group(function(){
+        Route::get('/detail-pengeluaran', 'index')->name('detail-pengeluaran.index');
+        Route::post('/detail-pengeluaran', 'store')->name('detail-pengeluaran.store');
+        Route::get('/detail-pengeluaran/{id}', 'show')->name('detail-pengeluaran.show');
+        Route::put('/detail-pengeluaran/{id}', 'update')->name('detail-pengeluaran.update');
+        Route::delete('/detail-pengeluaran/{id}', 'destroy')->name('detail-pengeluaran.destroy');
+        Route::delete('/detail-pengeluaran', 'destroyMultiple')->name('detail-pengeluaran.destroyMultiple');
     });
 
     /* USERS & LOGOUT */
