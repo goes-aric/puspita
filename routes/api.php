@@ -6,6 +6,8 @@ use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Kendaraan\KendaraanController;
+use App\Http\Controllers\Pendapatan\PendapatanController;
+use App\Http\Controllers\Pendapatan\DetailPendapatanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +47,26 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/kendaraan/{id}', 'update')->name('kendaraan.update');
         Route::delete('/kendaraan/{id}', 'destroy')->name('kendaraan.destroy');
         Route::delete('/kendaraan', 'destroyMultiple')->name('kendaraan.destroyMultiple');
+    });
+
+    /* PENDAPATAN */
+    Route::controller(PendapatanController::class)->group(function(){
+        Route::get('/pendapatan', 'index')->name('pendapatan.index');
+        Route::post('/pendapatan', 'store')->name('pendapatan.store');
+        Route::get('/pendapatan/{id}', 'show')->name('pendapatan.show');
+        Route::put('/pendapatan/{id}', 'update')->name('pendapatan.update');
+        Route::delete('/pendapatan/{id}', 'destroy')->name('pendapatan.destroy');
+        Route::delete('/pendapatan', 'destroyMultiple')->name('pendapatan.destroyMultiple');
+    });
+
+    /* DETAIL PENDAPATAN */
+    Route::controller(DetailPendapatanController::class)->group(function(){
+        Route::get('/detail-pendapatan', 'index')->name('detail-pendapatan.index');
+        Route::post('/detail-pendapatan', 'store')->name('detail-pendapatan.store');
+        Route::get('/detail-pendapatan/{id}', 'show')->name('detail-pendapatan.show');
+        Route::put('/detail-pendapatan/{id}', 'update')->name('detail-pendapatan.update');
+        Route::delete('/detail-pendapatan/{id}', 'destroy')->name('detail-pendapatan.destroy');
+        Route::delete('/detail-pendapatan', 'destroyMultiple')->name('detail-pendapatan.destroyMultiple');
     });
 
     /* USERS & LOGOUT */
