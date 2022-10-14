@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Akun\AkunController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Kendaraan\KendaraanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,17 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/akun/{id}', 'update')->name('akun.update');
         Route::delete('/akun/{id}', 'destroy')->name('akun.destroy');
         Route::delete('/akun', 'destroyMultiple')->name('akun.destroyMultiple');
+    });
+
+    /* KENDARAAN */
+    Route::controller(KendaraanController::class)->group(function(){
+        Route::get('/kendaraan/options', 'fetchDataOptions')->name('kendaraan.fetchDataOptions');
+        Route::get('/kendaraan', 'index')->name('kendaraan.index');
+        Route::post('/kendaraan', 'store')->name('kendaraan.store');
+        Route::get('/kendaraan/{id}', 'show')->name('kendaraan.show');
+        Route::put('/kendaraan/{id}', 'update')->name('kendaraan.update');
+        Route::delete('/kendaraan/{id}', 'destroy')->name('kendaraan.destroy');
+        Route::delete('/kendaraan', 'destroyMultiple')->name('kendaraan.destroyMultiple');
     });
 
     /* USERS & LOGOUT */
