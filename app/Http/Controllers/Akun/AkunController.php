@@ -35,8 +35,6 @@ class AkunController extends BaseController
             $rules = [
                 'kode_akun'		=> 'required|string|unique:akun',
                 'nama_akun'     => 'required|string|max:255',
-                'akun_induk'    => 'nullable',
-                'tipe_akun'     => 'required',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -66,8 +64,6 @@ class AkunController extends BaseController
             $rules = [
                 'kode_akun'		=> 'required|string|unique:akun,kode_akun,'.$id.'',
                 'nama_akun'     => 'required|string|max:255',
-                'akun_induk'    => 'nullable',
-                'tipe_akun'     => 'required',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {

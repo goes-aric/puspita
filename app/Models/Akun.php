@@ -14,15 +14,13 @@ class Akun extends BaseModel
         'columns' => [
             'kode_akun' => 10,
             'nama_akun' => 10,
-            'akun_induk' => 5,
-            'tipe_akun' => 5,
         ]
     ];
 
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'kode_akun', 'nama_akun', 'akun_induk', 'tipe_akun', 'created_id', 'updated_id',
+    	'kode_akun', 'nama_akun', 'id_user',
     ];
 
     protected $table = 'akun';

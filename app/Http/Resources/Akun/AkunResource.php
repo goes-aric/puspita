@@ -11,10 +11,7 @@ class AkunResource extends JsonResource
             'id'            => $this->id,
             'kode_akun'     => $this->kode_akun,
             'nama_akun'     => $this->nama_akun,
-            'akun_utama'    => $this->akun_utama,
-            'tipe_akun'     => $this->tipe_akun,
-            'created_user'  => $this->createdUser->nama,
-            'updated_user'  => $this->updatedUser->nama ?? null,
+            'created_user'  => $this->createdUser->nama_user,
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at
         ];

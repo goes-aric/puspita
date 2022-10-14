@@ -17,12 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('kode_akun', 150);
             $table->string('nama_akun', 255);
-            $table->string('akun_induk', 150)->nullable();
-            $table->string('tipe_akun', 255);
-            $table->bigInteger('created_id')->unsigned();
-            $table->foreign('created_id')->references('id')->on('users')->onDelete('cascade');
-            $table->bigInteger('updated_id')->unsigned()->nullable();
-            $table->foreign('updated_id')->references('id')->on('users')->onDelete('cascade');
+            $table->bigInteger('id_user')->unsigned();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

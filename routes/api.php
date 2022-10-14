@@ -27,7 +27,6 @@ Route::middleware(['auth:api'])->group(function(){
     /* BAGAN AKUN */
     Route::controller(AkunController::class)->group(function(){
         Route::get('/akun/options', 'fetchDataOptions')->name('akun.fetchDataOptions');
-        Route::get('/akun/all', 'list')->name('akun.list');
         Route::get('/akun', 'index')->name('akun.index');
         Route::post('/akun', 'store')->name('akun.store');
         Route::get('/akun/{id}', 'show')->name('akun.show');
@@ -38,7 +37,6 @@ Route::middleware(['auth:api'])->group(function(){
 
     /* USERS & LOGOUT */
     Route::controller(UserController::class)->group(function(){
-        Route::get('/users/options', 'fetchDataOptions')->name('users.fetchDataOptions');
         Route::delete('/users', 'destroyMultiple')->name('users.destroyMultiple');
         Route::put('/users/profile', 'updateProfile')->name('users.updateProfile');
         Route::put('/users/password', 'changePassword')->name('users.changePassword');
