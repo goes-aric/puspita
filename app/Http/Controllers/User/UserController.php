@@ -158,16 +158,4 @@ class UserController extends BaseController
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }
     }
-
-    public function fetchDataOptions(Request $request)
-    {
-        try {
-            $props = $this->getBaseQueryParams($request, []);
-            $users = $this->userServices->fetchDataOptions($props);
-
-            return $this->returnResponse('success', self::HTTP_OK, 'Daftar user', $users);
-        } catch (Exception $ex) {
-            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
-        }
-    }
 }

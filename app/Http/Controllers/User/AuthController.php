@@ -46,9 +46,9 @@ class AuthController extends BaseController
     public function register(Request $request){
         try {
             $rules = [
-                'nama'			        => 'required|string|max:255',
+                'nama_user'			    => 'required|string|max:255',
                 'alamat'                => 'nullable',
-                'no_telp'               => 'nullable',
+                'jabatan'               => 'required',
                 'username'		        => 'required|string|max:255|alpha_dash|unique:users',
                 'email'			        => 'required|string|email|max:255|unique:users',
                 'password'		        => [
@@ -57,7 +57,6 @@ class AuthController extends BaseController
                 'password_confirmation'	=> [
                     'required', Password::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()
                 ],
-                'hak_akses'             => 'required',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {

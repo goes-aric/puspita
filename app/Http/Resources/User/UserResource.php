@@ -9,13 +9,11 @@ class UserResource extends JsonResource
     {
         return [
             'id'        => $this->id,
-            'kode_user' => $this->kode_user,
-            'nama'      => ucwords(strtolower($this->nama)),
+            'nama_user' => ucwords(strtolower($this->nama_user)),
             'alamat'    => $this->alamat,
-            'no_telp'   => $this->no_telp,
-            'username'  => $this->username,
+            'jabatan'   => $this->jabatan,
             'email'     => $this->email,
-            'hak_akses' => $this->is_admin
+            'username'  => $this->username
         ];
     }
 }
