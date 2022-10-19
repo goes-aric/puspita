@@ -53,6 +53,8 @@ Route::middleware(['auth:api'])->group(function(){
 
     /* PENDAPATAN */
     Route::controller(PendapatanController::class)->group(function(){
+        Route::get('/pendapatan/charts', 'charts')->name('pendapatan.charts');
+        Route::get('/pendapatan/all', 'list')->name('pendapatan.list');
         Route::get('/pendapatan', 'index')->name('pendapatan.index');
         Route::post('/pendapatan', 'store')->name('pendapatan.store');
         Route::get('/pendapatan/{id}', 'show')->name('pendapatan.show');

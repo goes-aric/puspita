@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Services;
 
+use Image;
 use Exception;
 use Carbon\Carbon;
 use App\Models\User;
@@ -124,6 +125,49 @@ class BaseService
 
         /* RETURN AS A MODEL */
         return $model;
+    }
+
+    /* UPLOAD IMAGE FUNCTION */
+    protected function returnUploadImage($path, $name, $imageBinary)
+    {
+        try {
+            /* DECLARE NEW IMAGE VARIABLE */
+            $image = $imageBinary;
+
+            /* CHECK PATH IS EXISTS OR NOT */
+            /* IF DOES NOT EXISTS, CREATE DIRECTORY */
+            $thumbnailPath = $path . 'thumbnail';
+            if (!File::isDirectory($thumbnailPath)) {
+                File::makeDirectory($path, 0777, true, true);
+                File::makeDirectory($thumbnailPath, 0777, true, true);
+            }
+
+            /* UPLOAD THUMBNAIL IMAGE */
+            $thumbPath = $thumbnailPath . '/' . $name;
+            $thumbImage = Image::make($image->getRealPath());
+            $thumbImage->resize(560, 560, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save($thumbPath);
+
+            /* UPLOAD ORIGINAL IMAGE */
+            $originalPath = $path . '' . $name;
+            $originalImage = Image::make($image)->save($originalPath);
+
+            $response = [
+                'status'        => 'success',
+                'status_code'   => Response::HTTP_CREATED,
+                'filename'      => $name,
+                'message'       => 'Image uploaded'
+            ];
+            return $response;
+        } catch (Exception $ex) {
+            $response = [
+                'status'        => 'error',
+                'status_code'   => $ex->getCode(),
+                'message'       => 'Error Message : ' . $ex->getMessage()
+            ];
+            return $response;
+        }
     }
 
     /* UPLOAD FILE FUNCTION */

@@ -6,16 +6,22 @@ use App\Models\Pendapatan;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Pendapatan\PendapatanResource;
+use App\Http\Services\Pendapatan\DetailPendapatanService;
+use App\Models\DetailPendapatan;
 
 class PendapatanService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $pendapatanModel;
+    private $detailModel;
+    private $detailService;
     private $carbon;
 
     public function __construct()
     {
         $this->pendapatanModel = new Pendapatan();
+        $this->detailModel = new DetailPendapatan();
+        $this->detailService = new DetailPendapatanService;
         $this->carbon = $this->returnCarbon();
     }
 
@@ -73,11 +79,39 @@ class PendapatanService extends BaseService
         DB::beginTransaction();
 
         try {
+            $imageName = null;
+            $imagePath = storage_path("app/public/images/");
+            $imageBinary = $props->file('gambar');
+
+            /* TRY TO UPLOAD IMAGE FIRST */
+            /* DECLARE NEW IMAGE VARIABLE */
+            $image = $props->file('gambar');
+            $newName = 'pendapatan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+            if ($uploadImage['status'] == 'success') {
+                $imageName = $uploadImage['filename'];
+            }
+
             $pendapatan = $this->pendapatanModel;
             $pendapatan->tanggal    = $props['tanggal'];
-            $pendapatan->gambar     = $props['gambar'];
+            $pendapatan->gambar     = $imageName;
             $pendapatan->id_user    = $this->returnAuthUser()->id;
             $pendapatan->save();
+
+            /* DETAILS */
+            foreach (json_decode($props['pendapatan']) as $item) {
+                $detail = new $this->detailModel;
+                $detail->id_pendapatan_parkir   = $pendapatan['id'];
+                $detail->id_kendaraan           = $item->id;
+                $detail->jenis_kendaraan        = $item->jenis_kendaraan;
+                $detail->jumlah_kendaraan       = $item->jumlah_kendaraan;
+                $detail->biaya_parkir           = preg_replace("/([^0-9\\.])/i", "", $item->biaya_parkir);
+                $detail->total                  = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_total);
+                $detail->save();
+            }
+
+            /* UPDATE JUMLAH TOTAL ON PENDAPATAN PARKIR */
+            $this->detailService->updateJumlahTotal($pendapatan['id']);
 
             /* COMMIT DB TRANSACTION */
             DB::commit();
@@ -100,11 +134,49 @@ class PendapatanService extends BaseService
         try {
             $pendapatan = $this->pendapatanModel::find($id);
             if ($pendapatan) {
+                $imageName = $pendapatan->gambar;
+                $imagePath = storage_path("app/public/images/");
+                $imageBinary = $props->file('gambar');
+
+                /* TRY TO UPLOAD IMAGE */
+                if (!empty($props->file('gambar'))) {
+                    // IF CURRENT IMAGE IS NOT EMPTY, DELETE CURRENT IMAGE
+                    if ($pendapatan->gambar != null) {
+                        $this->returnDeleteFile($imagePath, $imageName);
+                    }
+
+                    /* DECLARE NEW IMAGE VARIABLE */
+                    $image = $props->file('gambar');
+                    $newName = 'pendapatan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $uploadImage = $this->returnUploadImage($imagePath, $newName, $imageBinary);
+                    if ($uploadImage['status'] == 'success') {
+                        $imageName = $uploadImage['filename'];
+                    }
+                }
+
                 /* UPDATE PENDAPATAN */
                 $pendapatan->tanggal    = $props['tanggal'];
-                $pendapatan->gambar     = $props['gambar'];
+                $pendapatan->gambar     = $imageName;
                 $pendapatan->id_user    = $this->returnAuthUser()->id;
                 $pendapatan->update();
+
+                /* REMOVE PREV DETAILS */
+                $this->detailModel::where('id_pendapatan_parkir', '=', $pendapatan['id'])->delete();
+
+                /* DETAILS */
+                foreach (json_decode($props['pendapatan']) as $item) {
+                    $detail = new $this->detailModel;
+                    $detail->id_pendapatan_parkir   = $pendapatan['id'];
+                    $detail->id_kendaraan           = $item->id;
+                    $detail->jenis_kendaraan        = $item->jenis_kendaraan;
+                    $detail->jumlah_kendaraan       = $item->jumlah_kendaraan;
+                    $detail->biaya_parkir           = preg_replace("/([^0-9\\.])/i", "", $item->biaya_parkir);
+                    $detail->total                  = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_total);
+                    $detail->save();
+                }
+
+                /* UPDATE JUMLAH TOTAL ON PENDAPATAN PARKIR */
+                $this->detailService->updateJumlahTotal($pendapatan['id']);
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
@@ -150,6 +222,44 @@ class PendapatanService extends BaseService
             }
 
             throw new Exception('Catatan tidak ditemukan!');
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    /* FETCH LAPORAN PENDAPATAN */
+    public function fetchAll($props){
+        $tanggalMulai = isset($props['start']) ? $props['start'] : $this->carbon::now();
+        $tanggalAkhir = isset($props['end']) ? $props['end'] : $this->carbon::now();
+
+        $datas = DB::table('detail_pendapatan_parkir')
+                    ->join('pendapatan_parkir', 'detail_pendapatan_parkir.id_pendapatan_parkir', '=', 'pendapatan_parkir.id')
+                    ->select(DB::raw('id_kendaraan, jenis_kendaraan, SUM(jumlah_kendaraan) AS jumlah, biaya_parkir, SUM(total) AS total'))
+                    ->where('pendapatan_parkir.tanggal', '>=', $tanggalMulai)
+                    ->where('pendapatan_parkir.tanggal', '<=', $tanggalAkhir)
+                    ->groupBy('id_kendaraan', 'jenis_kendaraan', 'biaya_parkir')
+                    ->get();
+        return $datas;
+    }
+
+    /* CHARTS PENDAPATAN */
+    public function charts(){
+        try {
+            $pendapatan = [];
+            $year = $this->carbon::now()->format('Y');
+            $data = [];
+            for ($x=1; $x <= 12; $x++) {
+                $data[] = $this->pendapatanModel::selectRaw("$x AS month, IFNULL(SUM(grand_total), 0) AS amount, 'Rupiah' AS unit")
+                            ->whereYear('pendapatan_parkir.tanggal', '=', $year)
+                            ->whereMonth('pendapatan_parkir.tanggal', '=', $x)
+                            ->first();
+            }
+
+            $pendapatan[] = [
+                'name'  => $year,
+                'data'  => $data
+            ];
+            return $pendapatan;
         } catch (Exception $ex) {
             throw $ex;
         }

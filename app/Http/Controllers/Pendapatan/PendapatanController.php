@@ -17,6 +17,18 @@ class PendapatanController extends BaseController
         $this->moduleName = 'Pendapatan Parkir';
     }
 
+    public function list(Request $request)
+    {
+        try {
+            $props = $this->getBaseQueryParams($request, []);
+            $pendapatan = $this->pendapatanServices->fetchAll($props);
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Daftar pendapatan parkir', $pendapatan);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
     public function index(Request $request)
     {
         try {
@@ -63,7 +75,7 @@ class PendapatanController extends BaseController
         try {
             $rules = [
                 'tanggal'   => 'required|date',
-                'gambar'    => 'required',
+                'gambar'    => 'nullable',
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {
@@ -94,6 +106,17 @@ class PendapatanController extends BaseController
             $pendapatan = $this->pendapatanServices->destroyMultiplePendapatan($props);
 
             return $this->returnResponse('success', self::HTTP_OK, 'Pendapatan parkir berhasil dihapus!', $pendapatan);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
+    public function charts(Request $request)
+    {
+        try {
+            $pendapatan = $this->pendapatanServices->charts();
+
+            return $this->returnResponse('success', self::HTTP_OK, 'Grafik pendapatan parkir', $pendapatan);
         } catch (Exception $ex) {
             return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
         }
