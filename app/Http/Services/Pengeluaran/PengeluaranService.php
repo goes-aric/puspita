@@ -6,16 +6,21 @@ use App\Models\Pengeluaran;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Pengeluaran\PengeluaranResource;
+use App\Models\DetailPengeluaran;
 
 class PengeluaranService extends BaseService
 {
     /* PRIVATE VARIABLE */
     private $pengeluaranModel;
+    private $detailModel;
+    private $detailService;
     private $carbon;
 
     public function __construct()
     {
         $this->pengeluaranModel = new Pengeluaran();
+        $this->detailModel = new DetailPengeluaran();
+        $this->detailService = new DetailPengeluaranService;
         $this->carbon = $this->returnCarbon();
     }
 
@@ -79,6 +84,20 @@ class PengeluaranService extends BaseService
             $pengeluaran->id_user   = $this->returnAuthUser()->id;
             $pengeluaran->save();
 
+            /* DETAILS */
+            foreach (json_decode($props['pengeluaran']) as $item) {
+                $detail = new $this->detailModel;
+                $detail->id_pengeluaran_parkir  = $pengeluaran['id'];
+                $detail->tanggal                = $item->tanggal;
+                $detail->kode_akun              = $item->kode_akun;
+                $detail->nama_akun              = $item->nama_akun;
+                $detail->jumlah_pengeluaran     = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_pengeluaran);
+                $detail->save();
+            }
+
+            /* UPDATE JUMLAH TOTAL ON PENGELUARAN PARKIR */
+            $this->detailService->updateJumlahTotal($pengeluaran['id']);
+
             /* COMMIT DB TRANSACTION */
             DB::commit();
 
@@ -105,6 +124,23 @@ class PengeluaranService extends BaseService
                 $pengeluaran->tahun     = $props['tahun'];
                 $pengeluaran->id_user   = $this->returnAuthUser()->id;
                 $pengeluaran->update();
+
+                /* REMOVE PREV DETAILS */
+                $this->detailModel::where('id_pengeluaran_parkir', '=', $pengeluaran['id'])->delete();
+
+                /* DETAILS */
+                foreach (json_decode($props['pengeluaran']) as $item) {
+                    $detail = new $this->detailModel;
+                    $detail->id_pengeluaran_parkir  = $pengeluaran['id'];
+                    $detail->tanggal                = $item->tanggal;
+                    $detail->kode_akun              = $item->kode_akun;
+                    $detail->nama_akun              = $item->nama_akun;
+                    $detail->jumlah_pengeluaran     = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_pengeluaran);
+                    $detail->save();
+                }
+
+                /* UPDATE JUMLAH TOTAL ON PENGELUARAN PARKIR */
+                $this->detailService->updateJumlahTotal($pengeluaran['id']);
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
