@@ -105,8 +105,8 @@ class PendapatanService extends BaseService
                 $detail->id_kendaraan           = $item->id;
                 $detail->jenis_kendaraan        = $item->jenis_kendaraan;
                 $detail->jumlah_kendaraan       = $item->jumlah_kendaraan;
-                $detail->biaya_parkir           = preg_replace("/([^0-9\\.])/i", "", $item->biaya_parkir);
-                $detail->total                  = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_total);
+                $detail->biaya_parkir           = $item->biaya_parkir;
+                $detail->total                  = $item->jumlah_total;
                 $detail->save();
             }
 
@@ -161,22 +161,22 @@ class PendapatanService extends BaseService
                 $pendapatan->update();
 
                 /* REMOVE PREV DETAILS */
-                $this->detailModel::where('id_pendapatan_parkir', '=', $pendapatan['id'])->delete();
+                $this->detailModel::where('id_pendapatan_parkir', '=', $id)->delete();
 
                 /* DETAILS */
                 foreach (json_decode($props['pendapatan']) as $item) {
                     $detail = new $this->detailModel;
-                    $detail->id_pendapatan_parkir   = $pendapatan['id'];
+                    $detail->id_pendapatan_parkir   = $id;
                     $detail->id_kendaraan           = $item->id;
                     $detail->jenis_kendaraan        = $item->jenis_kendaraan;
                     $detail->jumlah_kendaraan       = $item->jumlah_kendaraan;
-                    $detail->biaya_parkir           = preg_replace("/([^0-9\\.])/i", "", $item->biaya_parkir);
-                    $detail->total                  = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_total);
+                    $detail->biaya_parkir           = $item->biaya_parkir;
+                    $detail->total                  = $item->jumlah_total;
                     $detail->save();
                 }
 
                 /* UPDATE JUMLAH TOTAL ON PENDAPATAN PARKIR */
-                $this->detailService->updateJumlahTotal($pendapatan['id']);
+                $this->detailService->updateJumlahTotal($id);
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
