@@ -91,7 +91,7 @@ class PengeluaranService extends BaseService
                 $detail->tanggal                = $item->tanggal;
                 $detail->kode_akun              = $item->kode_akun;
                 $detail->nama_akun              = $item->nama_akun;
-                $detail->jumlah_pengeluaran     = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_pengeluaran);
+                $detail->jumlah_pengeluaran     = $item->jumlah_pengeluaran;
                 $detail->save();
             }
 
@@ -126,21 +126,21 @@ class PengeluaranService extends BaseService
                 $pengeluaran->update();
 
                 /* REMOVE PREV DETAILS */
-                $this->detailModel::where('id_pengeluaran_parkir', '=', $pengeluaran['id'])->delete();
+                $this->detailModel::where('id_pengeluaran_parkir', '=', $id)->delete();
 
                 /* DETAILS */
                 foreach (json_decode($props['pengeluaran']) as $item) {
                     $detail = new $this->detailModel;
-                    $detail->id_pengeluaran_parkir  = $pengeluaran['id'];
+                    $detail->id_pengeluaran_parkir  = $id;
                     $detail->tanggal                = $item->tanggal;
                     $detail->kode_akun              = $item->kode_akun;
                     $detail->nama_akun              = $item->nama_akun;
-                    $detail->jumlah_pengeluaran     = preg_replace("/([^0-9\\.])/i", "", $item->jumlah_pengeluaran);
+                    $detail->jumlah_pengeluaran     = $item->jumlah_pengeluaran;
                     $detail->save();
                 }
 
                 /* UPDATE JUMLAH TOTAL ON PENGELUARAN PARKIR */
-                $this->detailService->updateJumlahTotal($pengeluaran['id']);
+                $this->detailService->updateJumlahTotal($id);
 
                 /* COMMIT DB TRANSACTION */
                 DB::commit();
