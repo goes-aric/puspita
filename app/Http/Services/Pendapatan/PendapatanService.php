@@ -3,11 +3,12 @@ namespace App\Http\Services\Pendapatan;
 
 use Exception;
 use App\Models\Pendapatan;
+use Illuminate\Support\Str;
+use App\Models\DetailPendapatan;
 use App\Http\Services\BaseService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Pendapatan\PendapatanResource;
 use App\Http\Services\Pendapatan\DetailPendapatanService;
-use App\Models\DetailPendapatan;
 
 class PendapatanService extends BaseService
 {
@@ -86,7 +87,7 @@ class PendapatanService extends BaseService
             /* TRY TO UPLOAD IMAGE FIRST */
             /* DECLARE NEW IMAGE VARIABLE */
             $image = $props->file('gambar');
-            $newName = 'pendapatan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+            $newName = 'pendapatan-'.Str::random(5).'.'. $image->getClientOriginalExtension();
             $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
             if ($uploadImage['status'] == 'success') {
                 $imageName = $uploadImage['filename'];
@@ -147,7 +148,7 @@ class PendapatanService extends BaseService
 
                     /* DECLARE NEW IMAGE VARIABLE */
                     $image = $props->file('gambar');
-                    $newName = 'pendapatan-'.$this->carbon::now().'.'. $image->getClientOriginalExtension();
+                    $newName = 'pendapatan-'.Str::random(5).'.'. $image->getClientOriginalExtension();
                     $uploadImage = $this->returnUploadFile($imagePath, $newName, $imageBinary);
                     if ($uploadImage['status'] == 'success') {
                         $imageName = $uploadImage['filename'];
