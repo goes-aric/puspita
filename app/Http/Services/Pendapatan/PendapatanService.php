@@ -28,16 +28,30 @@ class PendapatanService extends BaseService
 
     /* FETCH ALL PENDAPATAN */
     public function fetchLimit($props){
+        /* GET DATA USER */
+        $user = $this->returnAuthUser();
+
         /* GET DATA FOR PAGINATION AS A MODEL */
         $getAllData = $this->dataFilterPagination($this->pendapatanModel, [], null);
         $totalData = $getAllData->count();
 
         /* GET DATA WITH FILTER FOR PAGINATION AS A MODEL */
         $getFilterData = $this->dataFilterPagination($this->pendapatanModel, $props, null);
+
+        /* IF USER JABATAN IS PETUGAS, GET ONLY THEIR DATA */
+        if ($user->jabatan == 'Petugas') {
+            $getFilterData = $getFilterData->where('id_user', '=', $user->id);
+        }
+
         $totalFiltered = $getFilterData->count();
 
         /* GET DATA WITH FILTER AS A MODEL */
         $datas = $this->dataFilter($this->pendapatanModel, $props, null);
+
+        /* IF USER JABATAN IS PETUGAS, GET ONLY THEIR DATA */
+        if ($user->jabatan == 'Petugas') {
+            $datas = $datas->where('id_user', '=', $user->id);
+        }
 
         /* RETRIEVE ALL ROW, CONVERT TO ARRAY AND FORMAT AS RESOURCE */
         $datas = $datas->get();
