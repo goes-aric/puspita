@@ -77,6 +77,12 @@ class UserController extends BaseController
                 'jabatan'   => 'nullable',
                 'username'  => 'required|string|max:255|alpha_dash|unique:users,username,'.$id.'',
                 'email'     => 'required|email|max:255|unique:users,email,'.$id.'',
+                'password'              => [
+                    'nullable', 'confirmed', Password::min(6)->letters()->mixedCase()->numbers()->symbols()->uncompromised()
+                ],
+                'password_confirmation'	=> [
+                    'nullable', Password::min(6)->letters()->mixedCase()->numbers()->symbols()->uncompromised()
+                ],
             ];
             $validator = $this->returnValidator($request->all(), $rules);
             if ($validator->fails()) {

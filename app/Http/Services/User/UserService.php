@@ -111,6 +111,12 @@ class UserService extends BaseService
                 $user->jabatan      = $props['jabatan'];
                 $user->email        = $props['email'];
                 $user->username     = $props['username'];
+
+                /* CHECK PASSWORD IS FILL OR NOT */
+                /* IF FILL OUT, UPDATE PASSWORD OTHERWISE SKIP */
+                if ($props['password']) {
+                    $user->password = bcrypt($props['password']);
+                }
                 $user->update();
 
                 /* COMMIT DB TRANSACTION */
