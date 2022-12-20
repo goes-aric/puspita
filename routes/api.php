@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Akun\AkunController;
+use App\Http\Controllers\ArusKas\ArusKasController;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Kendaraan\KendaraanController;
@@ -91,6 +92,12 @@ Route::middleware(['auth:api'])->group(function(){
         Route::put('/detail-pengeluaran/{id}', 'update')->name('detail-pengeluaran.update');
         Route::delete('/detail-pengeluaran/{id}', 'destroy')->name('detail-pengeluaran.destroy');
         Route::delete('/detail-pengeluaran', 'destroyMultiple')->name('detail-pengeluaran.destroyMultiple');
+    });
+
+    /* ARUS KAS */
+    Route::controller(ArusKasController::class)->group(function(){
+        Route::get('/arus-kas/pendapatan', 'listPendapatan')->name('arus-kas.listPendapatan');
+        Route::get('/arus-kas/pengeluaran', 'listPengeluaran')->name('arus-kas.listPengeluaran');
     });
 
     /* USERS & LOGOUT */
