@@ -12,6 +12,8 @@ class PendapatanResource extends JsonResource
             'tanggal'           => $this->tanggal,
             'grand_total'       => $this->grand_total,
             'gambar'            => $this->gambar ? asset('/storage/images') . '/' . $this->gambar : null,
+            'status'            => $this->status,
+            'status_text'       => $this->status ? 'Disetujui' : 'Belum Disetujui',
             'details'           => $this->details,
             'created_user'      => $this->createdUser->nama_user,
         ];

@@ -15,13 +15,14 @@ class Pendapatan extends BaseModel
             'tanggal' => 10,
             'grand_total' => 10,
             'gambar' => 5,
+            'status' => 5,
         ]
     ];
 
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-    	'tanggal', 'grand_total', 'gambar', 'id_user',
+    	'tanggal', 'grand_total', 'gambar', 'status', 'id_user',
     ];
 
     protected $table = 'pendapatan_parkir';

@@ -209,6 +209,34 @@ class PendapatanService extends BaseService
         }
     }
 
+    /* VALIDASI PENDAPATAN */
+    public function validatePendapatan($id){
+        /* BEGIN DB TRANSACTION */
+        DB::beginTransaction();
+
+        try {
+            $pendapatan = $this->pendapatanModel::find($id);
+            if ($pendapatan) {
+                /* UPDATE PENDAPATAN */
+                $pendapatan->status     = 1;
+                $pendapatan->update();
+
+                /* COMMIT DB TRANSACTION */
+                DB::commit();
+
+                $pendapatan = PendapatanResource::make($pendapatan);
+                return $pendapatan;
+            } else {
+                throw new Exception('Catatan tidak ditemukan!');
+            }
+        } catch (Exception $ex) {
+            /* ROLLBACK DB TRANSACTION */
+            DB::rollback();
+
+            throw $ex;
+        }
+    }
+
     /* DESTROY PENDAPATAN */
     public function destroyPendapatan($id){
         try {

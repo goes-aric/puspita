@@ -89,6 +89,16 @@ class PendapatanController extends BaseController
         }
     }
 
+    public function validateData($id)
+    {
+        try {
+            $pendapatan = $this->pendapatanServices->validatePendapatan($id);
+            return $this->returnResponse('success', self::HTTP_OK, 'Pendapatan parkir berhasil divalidasi', $pendapatan);
+        } catch (Exception $ex) {
+            return $this->returnExceptionResponse('error', self::HTTP_BAD_REQUEST, $ex);
+        }
+    }
+
     public function destroy($id)
     {
         try {

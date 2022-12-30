@@ -60,6 +60,7 @@ Route::middleware(['auth:api'])->group(function(){
         Route::post('/pendapatan', 'store')->name('pendapatan.store');
         Route::get('/pendapatan/{id}', 'show')->name('pendapatan.show');
         Route::put('/pendapatan/{id}', 'update')->name('pendapatan.update');
+        Route::put('/pendapatan/validate/{id}', 'validateData')->name('pendapatan.validate');
         Route::delete('/pendapatan/{id}', 'destroy')->name('pendapatan.destroy');
         Route::delete('/pendapatan', 'destroyMultiple')->name('pendapatan.destroyMultiple');
     });
